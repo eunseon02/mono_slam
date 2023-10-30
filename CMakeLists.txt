@@ -16,7 +16,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_core REQUIRED)
+find_package(ament_cmake_export_dependencies REQUIRED)
+
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
@@ -25,9 +27,11 @@ find_package(image_transport REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Threads REQUIRED)
 
-add_executable(mono_slam src/main.cpp src/ORB_extractor.cpp)
+
+add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src/frame.cpp src/visualization.cpp)
 
 ament_target_dependencies(mono_slam rclcpp cv_bridge image_transport sensor_msgs OpenCV)
+# sophus ecl_linear_algebra ecl_time dslam_common
 
 install(TARGETS
   mono_slam

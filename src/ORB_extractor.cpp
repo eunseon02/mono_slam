@@ -1,34 +1,37 @@
-#include <iostream>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core/core.hpp>    ㅂㅂㅂㅂㅂㅂㅂㅂ`   
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
+#include <iostream>
 #include <chrono>
+
+#include "ORB_extractor.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 
 using namespace std;
 using namespace cv;
 
-int extractAndMatchORB(int argc, char **argv) {
-    if (argc != 3) {
-        cout << "usage: feature_extraction img1 img2" << endl;
-        return 1;
-    }
-    rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("ORB_extractor");
+void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_2, vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, vector<DMatch> matches) {
+    // if (argc != 3) {
+    //     cout << "usage: feature_extraction img1 img2" << endl;
+    //     return 1;
+    // }
+    // rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("ORB_extractor");
 
-    std::string img1_path, img2_path;
-    node->declare_parameter<std::string>("img1_path", "/path/to/default_img1.jpg");
-    node->declare_parameter<std::string>("img2_path", "/path/to/default_img2.jpg");
+    // std::string img1_path, img2_path;
+    // node->declare_parameter<std::string>("img1_path", "/path/to/default_img1.jpg");
+    // node->declare_parameter<std::string>("img2_path", "/path/to/default_img2.jpg");
 
-    node->get_parameter("img1_path", img1_path);
-    node->get_parameter("img2_path", img2_path);
+    // node->get_parameter("img1_path", img1_path);
+    // node->get_parameter("img2_path", img2_path);
 
-    //−− read images
-    Mat img_1 = imread(img1_path, IMREAD_COLOR);
-    Mat img_2 = imread(img2_path, IMREAD_COLOR);
-    assert(img_1.data != nullptr && img_2.data != nullptr);
+    // //−− read images
+    // Mat img_1 = imread(img1_path, IMREAD_COLOR);
+    // Mat img_2 = imread(img2_path, IMREAD_COLOR);
+    // assert(img_1.data != nullptr && img_2.data != nullptr);
 
     //−− initialization
-    std::vector<KeyPoint> keypoints_1, keypoints_2;
     Mat descriptors_1, descriptors_2;
     Ptr<FeatureDetector> detector = ORB::create();
     Ptr<DescriptorExtractor> descriptor = ORB::create();
@@ -36,7 +39,7 @@ int extractAndMatchORB(int argc, char **argv) {
 
     //−− detect Oriented FAST
     chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
-    detector->detect(img_1, keypoints_1);
+    // detector->detect(img_1, keypoints_1);
     detector->detect(img_2, keypoints_2);
 
     //−− compute BRIEF descriptor
@@ -51,7 +54,6 @@ int extractAndMatchORB(int argc, char **argv) {
     imshow("ORB features", outimg1);
 
     //−− use Hamming distance to match the features
-    vector<DMatch> matches;
     t1 = chrono::steady_clock::now();
     matcher->match(descriptors_1, descriptors_2, matches);
     t2 = chrono::steady_clock::now();
@@ -71,18 +73,16 @@ int extractAndMatchORB(int argc, char **argv) {
     std::vector<DMatch> good_matches;
     for (int i = 0; i < descriptors_1.rows; i++) {
     if (matches[i].distance <= max(2 * min_dist, 30.0)) {
-    good_matches.push_back(matches[i]);
+        good_matches.push_back(matches[i]);
+        }
     }
-    }
+    // //−− draw the results
+    // Mat img_match;
+    // Mat img_goodmatch;
+    // drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
+    // drawMatches(img_1, keypoints_1, img_2, keypoints_2, good_matches, img_goodmatch);
+    // imshow("all matches", img_match);
+    // imshow("good matches", img_goodmatch);
+    // waitKey(0);
 
-    //−− draw the results
-    Mat img_match;
-    Mat img_goodmatch;
-    drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
-    drawMatches(img_1, keypoints_1, img_2, keypoints_2, good_matches, img_goodmatch);
-    imshow("all matches", img_match);
-    imshow("good matches", img_goodmatch);
-    waitKey(0);
-
-    return 0;
 }

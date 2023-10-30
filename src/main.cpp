@@ -1,19 +1,38 @@
 #include <rclcpp/rclcpp.hpp>
-// ... (other includes)
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
-// Declare the function from ORB_extractor.cpp
-int extractAndMatchORB(int argc, char **argv);
+#include "Tracking.hpp"
+#include "visualization.hpp"
+// #include "visualization_msgs/msg/marker_array.hpp"
 
+using namespace std;
+using namespace cv;
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
 
     rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("ORB_extractor");
 
-    extractAndMatchORB(argc, argv);  // Call the ORB logic
+    // visualization
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr vis_pub = node->create_publisher<visualization_msgs::msg::MarkerArray>("visual_odometry_markers", 1);
+    Visualization visualizer(node);
+
+    // publish visual message (1s)
+    rclcpp::WallRate rate(1); 
+    while (rclcpp::ok()) {
+        visualizer.VisualizeCamera();
+        rate.sleep();
+    }
+
+    // Load Settings and Check
+    std::string package_share_directory = ament_index_cpp::get_package_share_directory("ORB_SLAM2");
+    std::string strSettingsFile = package_share_directory + "/" + argv[2];
+    Tracking Tracker(strSettingsFile);
+    Tracker.Run();
 
     rclcpp::spin(node);
 
     rclcpp::shutdown();
+    
     return 0;
 }
