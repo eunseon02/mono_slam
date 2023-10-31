@@ -8,14 +8,14 @@
 #include "common.hpp"
 #include "ORB_extractor.hpp"
 #include "camera.hpp"
-#include "visualization.hpp"
+#include "Visualization.hpp"
 
 using namespace std;
 using namespace cv;
 
 class Frame {
 public:
-    // Frame();
+    Frame();
     // ~Frame();
 
     typedef std::shared_ptr<Frame> Ptr;

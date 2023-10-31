@@ -3,7 +3,8 @@
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
-
+#include <Eigen/Core>
+#include <opencv2/core/eigen.hpp>
 
 
 #include <sophus/se3.hpp>

@@ -2,34 +2,31 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include "Tracking.hpp"
+// #include "Tracking.hpp"
+
+// #include "common.hpp"
 
 #include <iostream>
 #include <chrono>
 
-#include "visualization.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
+#include "Visualization.hpp"
+#include <visualization_msgs/msg/marker_array.hpp>
 
 Visualization::Visualization(rclcpp::Node::SharedPtr node) : node(node) {
     pub_marker_array = node->create_publisher<visualization_msgs::msg::MarkerArray>("mono/pose", 10);
 }
 
-void Visualization::VisualizeCamera()
+void Visualization::VisualizeCamera(std::shared_ptr<Frame> frame)
 {
     RCLCPP_INFO(node->get_logger(), "### start visualization ###");
 
     // visualize previous camera position
     visualization_msgs::msg::MarkerArray marker_array;
 
-
     for(auto &marker : traj) {
         marker.color.a *= 0.7;
         marker_array.markers.push_back(marker);
     }
-
-    // Create SE3 pose from rotation and translation
-    Sophus::SE3d estimatedCameraPose(Sophus::SO3d::exp(Eigen::Vector3d(R.at<double>(0, 0), R.at<double>(1, 0), R.at<double>(2, 0))),
-                    Eigen::Vector3d(t.at<double>(0, 0), t.at<double>(1, 0), t.at<double>(2, 0)));
 
     // visualize current camera position
     visualization_msgs::msg::Marker currentCam;
@@ -38,7 +35,7 @@ void Visualization::VisualizeCamera()
     currentCam.ns = "point";
     currentCam.id = marker_id++;
     currentCam.action = visualization_msgs::msg::Marker::ADD;
-    currentCam.pose = SE3ToGeometryMsgPose(estimatedCameraPose);
+    currentCam.pose = SE3ToGeometryMsgPose(frame->Pose());
     currentCam.type = visualization_msgs::msg::Marker::SPHERE;
     currentCam.scale.x = 1.0;
     currentCam.scale.y = 1.0;
@@ -48,8 +45,24 @@ void Visualization::VisualizeCamera()
 
     // position of current camera
     marker_array.markers.push_back(currentCam);
-    pub_marker_array->publish(traj);
+    pub_marker_array->publish(marker_array);
 
-    RCLCPP_INFO(ndoe->get_logger(), "complete visualization");
+    RCLCPP_INFO(node->get_logger(), "complete visualization");
 }
 
+geometry_msgs::msg::Pose Visualization::SE3ToGeometryMsgPose(const SE3& se3Pose) {
+    geometry_msgs::msg::Pose pose_msg;
+
+    // SE3 포즈의 위치 및 방향 정보를 Pose 메시지에 복사
+    pose_msg.position.x = se3Pose.translation().x();
+    pose_msg.position.y = se3Pose.translation().y();
+    pose_msg.position.z = se3Pose.translation().z();
+
+    Eigen::Quaterniond quaternion(Eigen::Matrix3d(se3Pose.rotationMatrix()));
+    pose_msg.orientation.x = quaternion.x();
+    pose_msg.orientation.y = quaternion.y();
+    pose_msg.orientation.z = quaternion.z();
+    pose_msg.orientation.w = quaternion.w();
+
+    return pose_msg;
+}

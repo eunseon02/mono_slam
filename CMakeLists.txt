@@ -18,7 +18,7 @@ endif()
 # find dependencies
 find_package(ament_cmake_core REQUIRED)
 find_package(ament_cmake_export_dependencies REQUIRED)
-
+find_package(visualization_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
@@ -28,10 +28,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(Threads REQUIRED)
 
 
-add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src/frame.cpp src/visualization.cpp)
+add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src/frame.cpp src/Visualization.cpp)
 
-ament_target_dependencies(mono_slam rclcpp cv_bridge image_transport sensor_msgs OpenCV)
-# sophus ecl_linear_algebra ecl_time dslam_common
+ament_target_dependencies(mono_slam rclcpp cv_bridge image_transport sensor_msgs visualization_msgs OpenCV)
+
 
 install(TARGETS
   mono_slam
@@ -43,7 +43,10 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
-
+# install(
+#   DIRECTORY include/
+#   DESTINATION include
+# )
 
 target_link_libraries(mono_slam Threads::Threads)
 

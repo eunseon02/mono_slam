@@ -1,6 +1,8 @@
-#include "visualization.hpp"
+#include "Visualization.hpp"
 
 #include <rclcpp/rclcpp.hpp>
+// #include <Eigen/Core>
+// #include <opencv2/core/eigen.hpp>
 
 #include<iostream>
 #include<fstream>
@@ -11,9 +13,11 @@
 using namespace std;
 using namespace cv;
 
-Tracking::Tracking(string strSettingPath){
+Tracking::Tracking(string strSettingPath, rclcpp::Node::SharedPtr node) : mpVisualization(std::make_shared<Visualization>(node)) {
     // ORB_extractor object 생성
     mpORBextractor = std::make_shared<ORB_extractor>();
+    // visualization 생성
+    // mpVisualization = std::make_shared<Visualization>(node);
 
     // Load camera parameters from settings file
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
@@ -104,6 +108,8 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
     // initial pose estimation
     TrackPreviousFrame();
 
+    mpVisualization->VisualizeCamera(mCurrentFrame);
+
     // // Track Frame.
     // bool bOK;
     
@@ -130,7 +136,7 @@ void Tracking::TrackPreviousFrame()
     // Estimate the motion between two frames
     PoseEstimation(mLastFrame->keypoint , mCurrentFrame->keypoint, mvIniMatches, Rcw, tcw);
     Triangulation(mLastFrame->keypoint, mCurrentFrame->keypoint, mvIniMatches, Rcw, tcw, points);
-    Create4x4Transform(Rcw, tcw);
+
 }
 
 void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, vector<DMatch> matches, Mat &R, Mat &t) {
@@ -208,22 +214,18 @@ Point2d Tracking::Projection(const Point2d &p, const Mat &K) {
     );
 }
 
-void Create4x4Transform(const cv::Mat& Rcw, const cv::Mat& tcw) {
-    // Create a 4x4 transformation matrix [R | t] in homogeneous coordinates
-    cv::Mat transform(4, 4, CV_64F);
+void Tracking::ConvertToPose(const cv::Mat& Rcw, const cv::Mat& tcw) {
+    Eigen::Matrix3d R;
+    Eigen::Vector3d t;
 
-    // Copy the rotation matrix to the top-left 3x3 submatrix of the 4x4 matrix
-    cv::Mat rotationSubmatrix = transform(cv::Rect(0, 0, 3, 3));
-    Rcw.copyTo(rotationSubmatrix);
+    cv::cv2eigen(Rcw, R);
+    cv::cv2eigen(tcw, t);
 
-    // Copy the translation vector to the rightmost column of the 4x4 matrix
-    cv::Mat translationSubmatrix = transform(cv::Rect(3, 0, 1, 3));
-    tcw.copyTo(translationSubmatrix);
+    Sophus::SE3d se3(R, t);
 
-    // Set the bottom row of the 4x4 matrix to [0, 0, 0, 1]
-    transform.at<double>(3, 3) = 1.0;
+    mCurrentFrame->SetPose(se3);
 
-    mCurrentFrame.mTcw = transform;
+    // mCurrentFrame->pose_ = se3;
 }
 
 // bool Tracking::NeedNewKeyFrame() {

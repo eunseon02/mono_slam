@@ -11,19 +11,10 @@
 
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
-
-  <!-- <build_depend>ecl_linear_algebra</build_depend>
-  <build_depend>ecl_time</build_depend>
-  <build_depend>sophus</build_depend>
-  <build_depend>dslam_common</build_depend> -->
+  <depend>visualization_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-
-  <!-- <exec_depend>ecl_linear_algebra</exec_depend>
-  <exec_depend>ecl_time</exec_depend>
-  <exec_depend>sophus</exec_depend>
-  <exec_depend>dslam_common</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>
