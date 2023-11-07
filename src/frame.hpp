@@ -13,8 +13,8 @@ using namespace cv;
 
 class Frame {
 public:
-    Frame();
-    // ~Frame();
+    Frame() {};
+    ~Frame();
 
     typedef std::shared_ptr<Frame> Ptr;
     unsigned long mdId = 0;  // id of this frame
@@ -25,8 +25,9 @@ public:
     SE3 pose_;
     std::mutex pose_mutex_;
     cv::Mat img_;
-    // extracted features in image
-    vector<KeyPoint> keypoint;
+    vector<KeyPoint> keypoints;
+    vector<DMatch> fIniMatches;
+    // std::set<*Mappoint> mMapPoints;
 
     std::shared_ptr<ORB_extractor> mpORBextractor;  
 
@@ -56,6 +57,14 @@ public:
         mdKeyframeId = KeyframeFactorId++;
     }
 
+    void SetmRcw(Mat R){
+        mRcw = R;
+    }
+
+    void Setmtcw(Mat t){
+        mtcw = t;
+    }
+
 private:
     // Call UpdatePoseMatrices(), before using
     cv::Mat mOw;
@@ -63,4 +72,10 @@ private:
     cv::Mat mtcw;
 
 };
+// class Mappoint
+// {
+// public:
+//     std::set<*Frame,int> mObservations;
+
+// };
 #endif

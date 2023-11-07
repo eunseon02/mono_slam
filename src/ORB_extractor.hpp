@@ -21,10 +21,10 @@ public:
     // ORB_extractor() {};
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr Raw_ImagePublisher;
     void extractAndMatchORB(const Mat &img_1, const Mat &img_2, vector<KeyPoint> &keypoints_1, vector<KeyPoint> &keypoints_2, vector<DMatch> &matches);
+    void extractORB(const cv::Mat &img, vector<KeyPoint> &keypoints);
 
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr MatchingResultPublisher;  
 // private:
 
 };
-
 #endif

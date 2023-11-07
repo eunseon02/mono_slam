@@ -41,17 +41,23 @@ public:
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr PeocessedImagePublisher;
 
 
+    static unsigned long nextId; // for Keyframe ID 
+
+
 protected:
     std::shared_ptr<ORB_extractor> mpORBextractor;
     std::shared_ptr<Visualization> mpVisualization;
-    Camera* mpcamera;
+    std::shared_ptr<Camera> mpCamera;
+    // Camera* mpcamera;
     int mMaxFrames;
 
-    void TrackPreviousFrame();
+    void TrackPreviousFrame(Frame* f);
     void PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, vector<DMatch> matches, Mat &R, Mat &t);
     void Triangulation(const vector<KeyPoint> keypoints_1, const vector<KeyPoint> keypoints_2, const std::vector<DMatch> &matches, const Mat &R, const Mat &t, vector<Point3d> &points);
     Point2d Projection(const Point2d &p, const Mat &K);
     void ConvertToPose(const cv::Mat& Rcw, const cv::Mat& tcw); 
+
+    cv::Mat EigenMatToCvMat(const Eigen::Matrix<double, 3, 3>& eigenMat);
 
     // Start
     void GrabImage(const sensor_msgs::msg::Image::SharedPtr msg);
@@ -61,13 +67,14 @@ protected:
 
     //Calibration matrix
     cv::Mat mK;
+    // Mat33 mK;
     cv::Mat mDistCoef;
 
 
     //Current matches in frame
     int mnMatchesInliers;
 
-    // bool NeedNewKeyFrame();
+    bool NeedNewKeyFrame();
 
     
     Visualization* pVisualization;

@@ -13,6 +13,8 @@
 using namespace std;
 using namespace cv;
 
+unsigned long Tracking::nextId = 0;
+
 Tracking::Tracking():Node("tracking") {
     // ORB_extractor object 생성
     mpORBextractor = std::make_shared<ORB_extractor>();
@@ -25,6 +27,11 @@ Tracking::Tracking():Node("tracking") {
     // visualization 생성
     mpVisualization = std::make_shared<Visualization>();
 
+    unsigned long nextId = 1; 
+
+    mpCamera = std::make_shared<Camera>();
+    mK = EigenMatToCvMat(mpCamera->K());
+    
     
 
 }
@@ -73,11 +80,12 @@ void Tracking::Run()
 void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
 {
     // initialize
-
+    Frame* f = new Frame();
+    f->mdId = nextId++;
+    RCLCPP_INFO(get_logger(), "%d", nextId);
     // vector<KeyPoint> keypoints1;
     // vector<KeyPoint> keypoints2;
     // vector<DMatch> mvIniMatches;
-    bool start;
 
     RCLCPP_INFO(get_logger(), "GrabImage");
     cv_bridge::CvImageConstPtr cv_ptr;
@@ -113,11 +121,25 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
     if (!mLastImage.empty()) {
         RCLCPP_INFO(get_logger(), "GrabImage3");
         //mCurrentFrame->img_ = im;
+        f->img_ = mCurrentImage;
        
-        RCLCPP_INFO(get_logger(), "GrabImage5");  
-        mpORBextractor->extractAndMatchORB(mLastImage, mCurrentImage, mLastKeypoint, mCurrentKeypoint, mvIniMatches);
+        mpORBextractor->extractAndMatchORB(mLastImage, f->img_, mLastKeypoint, f->keypoints, f->fIniMatches);
 
-    
+        //
+        // /*
+        // 매칭결과
+        // -> 매칭되면
+        // -> 맵포인트 불러와서
+        // -> 그 맵포인트에 Observation 추가
+        // -> 그 맵포인트를 현재 프레임에 넣어줘야됨
+        // -> 매칭 안됨 -> 생성
+        // */
+
+        // Frame f = new;
+        
+        // Mappoint *m = new MapPoint();
+        // m->mObservations.insert(f);
+        
         RCLCPP_INFO(get_logger(), "GrabImage5");
 
         // return;
@@ -127,13 +149,17 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
     else{
         mLastImage = mCurrentImage.clone();
         // mLastFrame->img_ = im.clone(); // 1st frame - last frame matching
-
         // mLastFrame->keypoint=extractORB(mLastFrame, keypoints)
+
         // origin of map
         RCLCPP_INFO(get_logger(), "GrabImage4");
         // mpORBextractor->extractAndMatchORB(mLastFrame->img_, im, mLastFrame->keypoint, keypoints, mvIniMatches);
-        // return; 
     
+        f->img_ = mCurrentImage;
+        mpORBextractor->extractORB(f->img_, f->keypoints);
+
+        return;
+
     }
 
     
@@ -144,15 +170,30 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
 
     // mLastFrame = mCurrentFrame;  // copy
 
-    mLastImage = mCurrentImage;
-    mLastKeypoint = mLastKeypoint;
+    mLastImage = f->img_;
+    mLastKeypoint = f->keypoints;
+
+
+    RCLCPP_INFO(get_logger(), "GrabImage6");
+
+    TrackPreviousFrame(f);
+
+    RCLCPP_INFO(get_logger(), "GrabImage7");
+
+    // insert a keyframe
+    if(NeedNewKeyFrame()) {
+        // current frame is a new keyframe
+        f->SetKeyFrame();
+        mnLastKeyFrameId = f->mdId;
+    }
+
 
 
     return;
 
 
     // // initial pose estimation
-    TrackPreviousFrame();
+
 
     // mpVisualization->VisualizeCamera(mCurrentFrame);
 
@@ -163,12 +204,7 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
     // bOK = TrackLocalMap(); 
 
 
-    // // insert a keyframe
-    // if(NeedNewKeyFrame()) {
-    //     // current frame is a new keyframe
-    //     mCurrentFrame->SetKeyFrame();
-    //     mnLastKeyFrameId = mCurrentFrame.mnId;
-    // }
+
 
     // return;
 }
@@ -200,22 +236,39 @@ std::vector<sensor_msgs::msg::Image::SharedPtr> Tracking::readImagesFromFolder(c
     return images;
 }
 
-void Tracking::TrackPreviousFrame()
+void Tracking::TrackPreviousFrame(Frame* f)
 {
+
+    RCLCPP_INFO(get_logger(), "TrackPreviousFrame");
+
     Mat Rcw; // Current Camera Rotation
     Mat tcw; // Current Camera Translation
     vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
-    vector<Point3d> points;
+    vector<Point3d> points; //generate map point
 
     // Estimate the motion between two frames
-    PoseEstimation(mLastFrame->keypoint , mCurrentFrame->keypoint, mvIniMatches, Rcw, tcw);
-    Triangulation(mLastFrame->keypoint, mCurrentFrame->keypoint, mvIniMatches, Rcw, tcw, points);
+    PoseEstimation(mLastKeypoint , f->keypoints, mvIniMatches, Rcw, tcw);
+
+    f->SetmRcw(Rcw);
+    f->Setmtcw(tcw);
+
+    RCLCPP_INFO(get_logger(), "TrackPreviousFrame!");
+
+    // Triangulation(mLastFrame->keypoints, f->keypoints, mvIniMatches, Rcw, tcw, points);
 
 }
 
 void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, vector<DMatch> matches, Mat &R, Mat &t) {
+
+
+    RCLCPP_INFO(get_logger(), "PoseEstimation");   
     // Camera Intrinsics
     Mat K = mK;
+
+    // K 유효성
+    RCLCPP_ERROR(get_logger(), "K.rows: %d", K.rows);
+    RCLCPP_ERROR(get_logger(), "K.cols: %d", K.cols);
+
 
     //−− Convert the matching point to the form of vector<Point2f>
     vector<Point2f> points1;
@@ -226,15 +279,24 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
         points2.push_back(keypoints_2[matches[i].trainIdx].pt);
     }
 
-    //−− Calculate fundamental matrix
-    // Mat fundamental_matrix = findFundamentalMat(points1, points2, cv::FM_8POINT);
-    // cout << "fundamental_matrix is " << endl << fundamental_matrix << endl;
+    if (points1.size() < 5 || points2.size() < 5) {
+        RCLCPP_ERROR(get_logger(), "Insufficient point pairs for essential matrix estimation. At least 5 pairs are required.");
+        // Handle the error as needed
+        return;
+    }
+  
 
     //−− Calculate essential matrix
     Point2d principal_point(K.at<double>(0, 2), K.at<double>(1, 2)); // camera principal point
     double focal_length = K.at<double>(0, 0); // camera focal length
+    RCLCPP_INFO(get_logger(), "PoseEstimation2");  
     Mat essential_matrix = findEssentialMat(points1, points2, focal_length, principal_point);
     // cout << "essential_matrix is " << endl << essential_matrix << endl;
+
+
+
+    RCLCPP_INFO(get_logger(), "PoseEstimation3");   
+
 
     //−− Recover rotation and translation from the essential matrix.
     recoverPose(essential_matrix, points1, points2, R, t, focal_length, principal_point);
@@ -242,6 +304,9 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
     RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2));
     RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2));
     RCLCPP_ERROR(get_logger(), "Estimated t: %f %f %f", t.at<double>(0), t.at<double>(1), t.at<double>(2));
+
+
+
     // cout << "R is " << endl << R << endl;
     // cout << "t is " << endl << t << endl;
 
@@ -304,27 +369,31 @@ void Tracking::ConvertToPose(const cv::Mat& Rcw, const cv::Mat& tcw) {
     // mCurrentFrame->pose_ = se3;
 }
 
-// bool Tracking::NeedNewKeyFrame() {
-//     // Condition 1a: More than "MaxFrames" have passed from last keyframe insertion
-//     const bool c1 = mCurrentFrame->mdId>=mnLastKeyFrameId+mMaxFrames;
-//     const bool c2 = mnMatchesInliers<nRefMatches*0.9 && mnMatchesInliers>15;
+bool Tracking::NeedNewKeyFrame() {
 
-//     if(c1&&c2)
-//     {
-//         if(LocalMappingState)
-//         {
-//             return true;
-//         }
-//         else
-//         {
-//             /////stop local mapping thread 
-//             return false;
-//         }
 
-//     }
-//     else
-//         return  false;
-// }
+
+    return true;
+    // // Condition 1a: More than "MaxFrames" have passed from last keyframe insertion
+    // const bool c1 = mCurrentFrame->mdId>=mnLastKeyFrameId+mMaxFrames;
+    // const bool c2 = mnMatchesInliers<nRefMatches*0.9 && mnMatchesInliers>15;
+
+    // if(c1&&c2)
+    // {
+    //     if(LocalMappingState)
+    //     {
+    //         return true;
+    //     }
+    //     else
+    //     {
+    //         /////stop local mapping thread 
+    //         return false;
+    //     }
+
+    // }
+    // else
+    //     return  false;
+}
 
 // bool Tracking::TrackLocalMap()
 // {
@@ -334,3 +403,16 @@ void Tracking::ConvertToPose(const cv::Mat& Rcw, const cv::Mat& tcw) {
 
 
 // }
+
+cv::Mat Tracking::EigenMatToCvMat(const Eigen::Matrix<double, 3, 3>& eigenMat)
+{
+    cv::Mat cvMat(3, 3, CV_64F); // 3x3의 double 형식의 cv::Mat를 생성
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            cvMat.at<double>(i, j) = eigenMat(i, j); // Eigen Matrix의 각 요소를 cv::Mat로 복사
+        }
+    }
+    return cvMat;
+}
