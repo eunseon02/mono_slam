@@ -1,6 +1,0 @@
-<launch>
-    <node pkg="mono_slam" exec="mono_slam" name="ORB_extractor" output="screen">
-        <param name="img1_path" value="/path/to/img1.jpg" />
-        <param name="img2_path" value="/path/to/img2.jpg" />
-    </node>
-</launch>

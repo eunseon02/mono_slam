@@ -15,38 +15,37 @@
 using namespace std;
 using namespace cv;
 
-class Tracking
+class Tracking: public rclcpp::Node
 {
 public:
-    Tracking(string strSettingPath, rclcpp::Node::SharedPtr node);
-    // Tracking(FramePublisher* pFramePublisher, MapPublisher* pMapPublisher, Map* pMap, string strSettingPath);
+    Tracking();
 
     // void SetLocalMapper(LocalMapping* pLocalMapper);
 
     // Current Frame
     std::shared_ptr<Frame> mCurrentFrame;
-
+    std::shared_ptr<Frame> mLastFrame;
     // Initialization Variables
     // std::vector<int> mvIniLastMatches;
-    vector<DMatch> mvIniMatches;
+    // vector<DMatch> mvIniMatches;
     unsigned int mnLastKeyFrameId;
     // std::vector<cv::Point2f> mvbPrevMatched;
     // std::vector<cv::Point3f> mvIniP3D;
     // Frame mInitialFrame;
-    void Run();  
+    void Run();
+
+    std::vector<sensor_msgs::msg::Image::SharedPtr> readImagesFromFolder(const std::string& folderPath);
+
+
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr RawImagePublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr PeocessedImagePublisher;
+
+
 protected:
     std::shared_ptr<ORB_extractor> mpORBextractor;
     std::shared_ptr<Visualization> mpVisualization;
     Camera* mpcamera;
     int mMaxFrames;
-    // void CreateInitialMap(cv::Mat &Rcw, cv::Mat &tcw);
-
-    // bool RelocalisationRequested();
-    // bool Relocalisation();    
-
-    // void UpdateReference();
-    // void UpdateReferencePoints();
-    // void UpdateReferenceKeyFrames();
 
     void TrackPreviousFrame();
     void PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, vector<DMatch> matches, Mat &R, Mat &t);
@@ -57,7 +56,6 @@ protected:
     // Start
     void GrabImage(const sensor_msgs::msg::Image::SharedPtr msg);
 
-    std::shared_ptr<Frame> mLastFrame;
 
     // bool TrackLocalMap();
 
@@ -76,6 +74,10 @@ protected:
 
 private:
     cv::Mat mLastImage, mCurrentImage;
+    vector<KeyPoint> mLastKeypoint, mCurrentKeypoint;
+    vector<DMatch> mvIniMatches;
+    std::string pkg_directory;
+
 
 };
 

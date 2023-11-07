@@ -1,0 +1,25 @@
+[35m[1mScanning dependencies of target mono_slam[0m
+[ 16%] [32mBuilding CXX object CMakeFiles/mono_slam.dir/src/Tracking.cpp.o[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/mono_slam.dir/src/ORB_extractor.cpp.o[0m
+[ 50%] [32m[1mLinking CXX executable mono_slam[0m
+[100%] Built target mono_slam
+-- Install configuration: ""
+-- Installing: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/lib/mono_slam/mono_slam
+-- Set runtime path of "/home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/lib/mono_slam/mono_slam" to ""
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/launch
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/launch/mono.launch.py
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/ament_index/resource_index/package_run_dependencies/mono_slam
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/ament_index/resource_index/parent_prefix_path/mono_slam
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/ament_prefix_path.sh
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/path.sh
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/path.dsv
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.bash
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.sh
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.zsh
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.dsv
+-- Installing: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/package.dsv
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/ament_index/resource_index/packages/mono_slam
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/cmake/mono_slamConfig.cmake
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/cmake/mono_slamConfig-version.cmake
+-- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/package.xml

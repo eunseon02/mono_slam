@@ -13,60 +13,73 @@
 using namespace std;
 using namespace cv;
 
-Tracking::Tracking(string strSettingPath, rclcpp::Node::SharedPtr node) : mpVisualization(std::make_shared<Visualization>(node)) {
+Tracking::Tracking():Node("tracking") {
     // ORB_extractor object 생성
     mpORBextractor = std::make_shared<ORB_extractor>();
+
+    this->pkg_directory = "/home/eunseon/ros2_ws/src/mono_slam/data/images";
+    
+    RawImagePublisher = this->create_publisher<sensor_msgs::msg::Image>("/camera/raw_image", 10);
+    PeocessedImagePublisher = this->create_publisher<sensor_msgs::msg::Image>("/camera/processed_image", 10);
+
     // visualization 생성
-    // mpVisualization = std::make_shared<Visualization>(node);
+    mpVisualization = std::make_shared<Visualization>();
 
-    // Load camera parameters from settings file
-    cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
-    float fx = fSettings["Camera.fx"];
-    float fy = fSettings["Camera.fy"];
-    float cx = fSettings["Camera.cx"];
-    float cy = fSettings["Camera.cy"];
-
-    cv::Mat K = cv::Mat::eye(3,3,CV_32F);
-    K.at<float>(0,0) = fx;
-    K.at<float>(1,1) = fy;
-    K.at<float>(0,2) = cx;
-    K.at<float>(1,2) = cy;
-    K.copyTo(mK);
-
-    cv::Mat DistCoef(4,1,CV_32F);
-    DistCoef.at<float>(0) = fSettings["Camera.k1"];
-    DistCoef.at<float>(1) = fSettings["Camera.k2"];
-    DistCoef.at<float>(2) = fSettings["Camera.p1"];
-    DistCoef.at<float>(3) = fSettings["Camera.p2"];
-    DistCoef.copyTo(mDistCoef);
-
-    float fps = fSettings["Camera.fps"];
-    if(fps==0)
-        fps=30;
-
-
-    mMaxFrames = 18*fps/30;
+    
 
 }
 
 void Tracking::Run()
 {
-    auto node = std::make_shared<rclcpp::Node>("tracking_node");
+    RCLCPP_INFO(get_logger(), "start tracking");
 
-    auto sub = node->create_subscription<sensor_msgs::msg::Image>(
-        "/camera/image_raw", 10,
-        std::bind(&Tracking::GrabImage, this, std::placeholders::_1));
+    // auto sub = node->create_subscription<sensor_msgs::msg::Image>(
+    //     "/camera/image_raw", 10,
+    //     std::bind(&Tracking::GrabImage, this, std::placeholders::_1));
+
+    std::vector<sensor_msgs::msg::Image::SharedPtr> imageList = readImagesFromFolder(this->pkg_directory);
+    RCLCPP_INFO(get_logger(), "tracking");   
+
+    for (const auto& image : imageList) {
+        RawImagePublisher->publish(*image);
+        RCLCPP_INFO(get_logger(), "Published image");
+        GrabImage(image);
+        RCLCPP_INFO(get_logger(), "Return");
+    }
 
 
-    rclcpp::spin(node);
+    // size_t imageIndex = 0; // 이미지 인덱스 초기화
+
+    // auto timerCallback = [this, imageList, &imageIndex](rclcpp::TimerBase& timer) {
+    //     if (imageIndex < imageList.size()) {
+    //         // 이미지 발행
+    //         RawImagePublisher->publish(*imageList[imageIndex]);
+    //         RCLCPP_INFO(get_logger(), "Published image %zu", imageIndex);
+
+    //         // 다음 이미지로 이동 또는 처음 이미지로 순환
+    //         imageIndex = (imageIndex + 1) % imageList.size();
+    //     }
+    // };
+
+    // // 0.3s timer
+    // rclcpp::TimerBase::SharedPtr timer = this->create_wall_timer(
+    //     std::chrono::milliseconds(30), timerCallback);
+
+    // std::string node_name = "tracking_node_" + std::to_string(imageIndex);
+    // rclcpp::spin(std::make_shared<Tracking>(node_name));    
+    
 }
 
 void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
 {
     // initialize
-    cv::Mat im;
-    vector<KeyPoint> keypoints;
 
+    // vector<KeyPoint> keypoints1;
+    // vector<KeyPoint> keypoints2;
+    // vector<DMatch> mvIniMatches;
+    bool start;
+
+    RCLCPP_INFO(get_logger(), "GrabImage");
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
@@ -82,33 +95,66 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
 
     if(cv_ptr->image.channels() == 3)
     {
-        cvtColor(cv_ptr->image, im, CV_RGB2GRAY);
+        cvtColor(cv_ptr->image, mCurrentImage, CV_RGB2GRAY);
     }
     else if(cv_ptr->image.channels() == 1)
     {
-        cv_ptr->image.copyTo(im);
+        cv_ptr->image.copyTo(mCurrentImage);
     }
+
+    // if (!(mCurrentFrame->img_).empty()) {
+    //     // delete mCurrentFrame->img_;
+    //     mCurrentFrame->img_ = (mCurrentFrame->img_).empty(); // 포인터를 null로 설정하여 더 이상 접근하지 않도록 합니다.
+    // }
+    RCLCPP_INFO(get_logger(), "GrabImage2");
+
 
     // ORB extractor for initialization
     if (!mLastImage.empty()) {
-        mpORBextractor->extractAndMatchORB(mLastFrame->img_, im, mLastFrame->keypoint, keypoints, mvIniMatches);
+        RCLCPP_INFO(get_logger(), "GrabImage3");
+        //mCurrentFrame->img_ = im;
+       
+        RCLCPP_INFO(get_logger(), "GrabImage5");  
+        mpORBextractor->extractAndMatchORB(mLastImage, mCurrentImage, mLastKeypoint, mCurrentKeypoint, mvIniMatches);
+
+    
+        RCLCPP_INFO(get_logger(), "GrabImage5");
+
+        // return;
+
+
     }
     else{
+        mLastImage = mCurrentImage.clone();
+        // mLastFrame->img_ = im.clone(); // 1st frame - last frame matching
+
+        // mLastFrame->keypoint=extractORB(mLastFrame, keypoints)
         // origin of map
+        RCLCPP_INFO(get_logger(), "GrabImage4");
+        // mpORBextractor->extractAndMatchORB(mLastFrame->img_, im, mLastFrame->keypoint, keypoints, mvIniMatches);
+        // return; 
+    
     }
 
     
-    // update Last Image
-    mLastImage = im.clone();
-    mCurrentFrame = std::make_shared<Frame>(im, cv_ptr->header.stamp.sec, mpORBextractor);
+    // // update Last Image
+    // mLastImage = im.clone();
+    // mCurrentFrame = std::make_shared<Frame>(im, cv_ptr->header.stamp.sec, mpORBextractor);
 
 
-    mLastFrame = mCurrentFrame;  // copy
+    // mLastFrame = mCurrentFrame;  // copy
 
-    // initial pose estimation
+    mLastImage = mCurrentImage;
+    mLastKeypoint = mLastKeypoint;
+
+
+    return;
+
+
+    // // initial pose estimation
     TrackPreviousFrame();
 
-    mpVisualization->VisualizeCamera(mCurrentFrame);
+    // mpVisualization->VisualizeCamera(mCurrentFrame);
 
     // // Track Frame.
     // bool bOK;
@@ -124,6 +170,34 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
     //     mnLastKeyFrameId = mCurrentFrame.mnId;
     // }
 
+    // return;
+}
+//chatgpt
+std::vector<sensor_msgs::msg::Image::SharedPtr> Tracking::readImagesFromFolder(const std::string& folderPath) {
+    std::vector<sensor_msgs::msg::Image::SharedPtr> images;
+
+    // Open the folder
+    cv::String folder = folderPath + "/*.jpg";
+    std::vector<cv::String> fn;
+    cv::glob(folder, fn, false);
+
+    for (const auto& filename : fn) {
+        // Read the image using OpenCV
+        cv::Mat cvImage = cv::imread(filename, cv::IMREAD_COLOR);
+        // cv::imshow("mono_slam", cvImage);
+        if (!cvImage.empty()) {
+            RCLCPP_INFO(get_logger(), "Image loaded successfully: %s", filename.c_str());
+        } else {
+            RCLCPP_ERROR(get_logger(), "Failed to load image: %s", filename.c_str());
+        }
+
+        // Convert the OpenCV image to a ROS sensor_msgs::msg::Image
+        sensor_msgs::msg::Image::SharedPtr rosImage = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", cvImage).toImageMsg();
+
+        images.push_back(rosImage);
+    }
+ 
+    return images;
 }
 
 void Tracking::TrackPreviousFrame()
@@ -153,21 +227,23 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
     }
 
     //−− Calculate fundamental matrix
-    Mat fundamental_matrix;
-    fundamental_matrix = findFundamentalMat(points1, points2, cv::FM_8POINT);
-    cout << "fundamental_matrix is " << endl << fundamental_matrix << endl;
+    // Mat fundamental_matrix = findFundamentalMat(points1, points2, cv::FM_8POINT);
+    // cout << "fundamental_matrix is " << endl << fundamental_matrix << endl;
 
     //−− Calculate essential matrix
     Point2d principal_point(K.at<double>(0, 2), K.at<double>(1, 2)); // camera principal point
     double focal_length = K.at<double>(0, 0); // camera focal length
-    Mat essential_matrix;
-    essential_matrix = findEssentialMat(points1, points2, focal_length, principal_point);
-    cout << "essential_matrix is " << endl << essential_matrix << endl;
+    Mat essential_matrix = findEssentialMat(points1, points2, focal_length, principal_point);
+    // cout << "essential_matrix is " << endl << essential_matrix << endl;
 
     //−− Recover rotation and translation from the essential matrix.
     recoverPose(essential_matrix, points1, points2, R, t, focal_length, principal_point);
-    cout << "R is " << endl << R << endl;
-    cout << "t is " << endl << t << endl;
+    RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2));
+    RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2));
+    RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2));
+    RCLCPP_ERROR(get_logger(), "Estimated t: %f %f %f", t.at<double>(0), t.at<double>(1), t.at<double>(2));
+    // cout << "R is " << endl << R << endl;
+    // cout << "t is " << endl << t << endl;
 
 }
 

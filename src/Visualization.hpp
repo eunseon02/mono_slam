@@ -1,9 +1,7 @@
 #ifndef VISUALIZATION_H
 #define VISUALIZATION_H
 
-// #include "frame.hpp"
 #include "camera.hpp"
-
 
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -19,16 +17,16 @@ using namespace cv;
 // Frame frame;
 class Frame; //
 
-class Visualization {
+class Visualization : public rclcpp::Node {
 public:
-    Visualization(rclcpp::Node::SharedPtr node);
+    Visualization();
     void VisualizeCamera(std::shared_ptr<Frame> frame);
+    Mat DrawFrame();
 
 private:
-    rclcpp::Node::SharedPtr node;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pub_marker_array;
     int marker_id = 0;
-    std::vector<visualization_msgs::msg::Marker> traj;
+    vector<visualization_msgs::msg::Marker> traj;
     geometry_msgs::msg::Pose SE3ToGeometryMsgPose(const SE3& se3Pose);
 
 };

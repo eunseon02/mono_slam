@@ -1,0 +1,4 @@
+Invoking command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --build /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam -- -j16 -l16
+Invoked command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --build /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam -- -j16 -l16
+Invoking command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --install /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam
+Invoked command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --install /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam

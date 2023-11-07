@@ -1,0 +1,29 @@
+[0.067s] Invoking command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --build /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam -- -j16 -l16
+[0.094s] [35m[1mScanning dependencies of target mono_slam[0m
+[0.124s] [ 16%] [32mBuilding CXX object CMakeFiles/mono_slam.dir/src/Tracking.cpp.o[0m
+[0.124s] [ 33%] [32mBuilding CXX object CMakeFiles/mono_slam.dir/src/ORB_extractor.cpp.o[0m
+[3.525s] [ 50%] [32m[1mLinking CXX executable mono_slam[0m
+[3.844s] [100%] Built target mono_slam
+[3.850s] Invoked command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --build /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam -- -j16 -l16
+[3.875s] Invoking command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --install /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam
+[3.879s] -- Install configuration: ""
+[3.879s] -- Installing: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/lib/mono_slam/mono_slam
+[3.879s] -- Set runtime path of "/home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/lib/mono_slam/mono_slam" to ""
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/launch
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/launch/mono.launch.py
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/ament_index/resource_index/package_run_dependencies/mono_slam
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/ament_index/resource_index/parent_prefix_path/mono_slam
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/ament_prefix_path.sh
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/ament_prefix_path.dsv
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/path.sh
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/environment/path.dsv
+[3.880s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.bash
+[3.881s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.sh
+[3.881s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.zsh
+[3.881s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/local_setup.dsv
+[3.882s] -- Installing: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/package.dsv
+[3.882s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/ament_index/resource_index/packages/mono_slam
+[3.882s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/cmake/mono_slamConfig.cmake
+[3.882s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/cmake/mono_slamConfig-version.cmake
+[3.882s] -- Up-to-date: /home/eunseon/ros2_ws/src/mono_slam/install/mono_slam/share/mono_slam/package.xml
+[3.882s] Invoked command in '/home/eunseon/ros2_ws/src/mono_slam/build/mono_slam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --install /home/eunseon/ros2_ws/src/mono_slam/build/mono_slam

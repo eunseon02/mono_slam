@@ -25,18 +25,26 @@ find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(Threads REQUIRED)
+#find_package(Threads REQUIRED)
 
 
 add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src/frame.cpp src/Visualization.cpp)
 
+#add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src/frame.cpp)
+
 ament_target_dependencies(mono_slam rclcpp cv_bridge image_transport sensor_msgs visualization_msgs OpenCV)
+
+
+#add_executable(mono_test src/mono.cpp)
+#ament_target_dependencies(mono_test rclcpp cv_bridge image_transport sensor_msgs visualization_msgs OpenCV)
+
 
 
 install(TARGETS
   mono_slam
   DESTINATION lib/${PROJECT_NAME}
 )
+
 
 install(DIRECTORY
   launch
@@ -48,9 +56,9 @@ install(DIRECTORY
 #   DESTINATION include
 # )
 
-target_link_libraries(mono_slam Threads::Threads)
+#target_link_libraries(mono_slam Threads::Threads)
 
-ament_target_dependencies(mono_slam rclcpp)
+ament_target_dependencies(mono_slam rclcpp cv_bridge)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

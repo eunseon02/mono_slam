@@ -12,13 +12,13 @@
 #include "Visualization.hpp"
 #include <visualization_msgs/msg/marker_array.hpp>
 
-Visualization::Visualization(rclcpp::Node::SharedPtr node) : node(node) {
-    pub_marker_array = node->create_publisher<visualization_msgs::msg::MarkerArray>("mono/pose", 10);
+Visualization::Visualization() : Node("Visualization") {
+    pub_marker_array = this->create_publisher<visualization_msgs::msg::MarkerArray>("mono/pose", 10);
 }
 
 void Visualization::VisualizeCamera(std::shared_ptr<Frame> frame)
 {
-    RCLCPP_INFO(node->get_logger(), "### start visualization ###");
+    RCLCPP_INFO(this->get_logger(), "### start visualization ###");
 
     // visualize previous camera position
     visualization_msgs::msg::MarkerArray marker_array;
@@ -31,7 +31,7 @@ void Visualization::VisualizeCamera(std::shared_ptr<Frame> frame)
     // visualize current camera position
     visualization_msgs::msg::Marker currentCam;
     currentCam.header.frame_id = "";
-    currentCam.header.stamp = node->now();
+    currentCam.header.stamp = this->now();
     currentCam.ns = "point";
     currentCam.id = marker_id++;
     currentCam.action = visualization_msgs::msg::Marker::ADD;
@@ -47,7 +47,7 @@ void Visualization::VisualizeCamera(std::shared_ptr<Frame> frame)
     marker_array.markers.push_back(currentCam);
     pub_marker_array->publish(marker_array);
 
-    RCLCPP_INFO(node->get_logger(), "complete visualization");
+    RCLCPP_INFO(this->get_logger(), "complete visualization");
 }
 
 geometry_msgs::msg::Pose Visualization::SE3ToGeometryMsgPose(const SE3& se3Pose) {
@@ -65,4 +65,10 @@ geometry_msgs::msg::Pose Visualization::SE3ToGeometryMsgPose(const SE3& se3Pose)
     pose_msg.orientation.w = quaternion.w();
 
     return pose_msg;
+}
+
+cv::Mat Visualization::DrawFrame()
+{
+    cv::Mat image;
+    return image;
 }

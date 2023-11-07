@@ -3,9 +3,7 @@
 
 #include "frame.hpp"
 
-#include <opencv2/opencv.hpp>
-
-#include "common.hpp"
+// #include "common.hpp"
 #include "ORB_extractor.hpp"
 #include "camera.hpp"
 #include "Visualization.hpp"
@@ -63,8 +61,6 @@ private:
     cv::Mat mOw;
     cv::Mat mRcw;
     cv::Mat mtcw;
-
-
 
 };
 #endif
