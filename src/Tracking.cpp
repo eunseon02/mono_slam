@@ -23,6 +23,7 @@ Tracking::Tracking():Node("tracking") {
     
     RawImagePublisher = this->create_publisher<sensor_msgs::msg::Image>("/camera/raw_image", 10);
     PeocessedImagePublisher = this->create_publisher<sensor_msgs::msg::Image>("/camera/processed_image", 10);
+    test_keypoint_Publisher = this->create_publisher<sensor_msgs::msg::Image>("/camera/test", 10);
 
     // visualization 생성
     mpVisualization = std::make_shared<Visualization>();
@@ -172,6 +173,7 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
 
     mLastImage = f->img_;
     mLastKeypoint = f->keypoints;
+    mvIniMatches = f->fIniMatches;
 
 
     RCLCPP_INFO(get_logger(), "GrabImage6");
@@ -187,6 +189,7 @@ void Tracking::GrabImage(const sensor_msgs::msg::Image::SharedPtr msg)
         mnLastKeyFrameId = f->mdId;
     }
 
+    // VisualizeCamera(f)
 
 
     return;
@@ -262,13 +265,36 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
 
 
     RCLCPP_INFO(get_logger(), "PoseEstimation");   
+
+
+    // test-----------------------------------
+    // // keypoint test
+    // Mat outimg1;
+    // drawKeypoints(mLastImage, keypoints_2, outimg1, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+    // // imshow("ORB features", outimg1);
+
+    // sensor_msgs::msg::Image::SharedPtr msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", outimg1).toImageMsg();
+
+    // // Publish the ROS image message
+    // test_keypoint_Publisher->publish(*msg);
+    //------------------------
+    // //test match
+    // Mat img_goodmatch;
+    // // drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
+    // drawMatches(mLastImage, keypoints_1, mLastImage, keypoints_2, matches, img_goodmatch);
+
+    // // Inside the extractAndMatchORB function
+    // cv_bridge::CvImage img_bridge = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", img_goodmatch);
+    // sensor_msgs::msg::Image img_msg;
+    // img_bridge.toImageMsg(img_msg);
+
+    // // Publish the image message
+    // test_keypoint_Publisher->publish(img_msg);
+
+    // //----
+
     // Camera Intrinsics
     Mat K = mK;
-
-    // K 유효성
-    RCLCPP_ERROR(get_logger(), "K.rows: %d", K.rows);
-    RCLCPP_ERROR(get_logger(), "K.cols: %d", K.cols);
-
 
     //−− Convert the matching point to the form of vector<Point2f>
     vector<Point2f> points1;
@@ -285,7 +311,6 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
         return;
     }
   
-
     //−− Calculate essential matrix
     Point2d principal_point(K.at<double>(0, 2), K.at<double>(1, 2)); // camera principal point
     double focal_length = K.at<double>(0, 0); // camera focal length
@@ -293,10 +318,7 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
     Mat essential_matrix = findEssentialMat(points1, points2, focal_length, principal_point);
     // cout << "essential_matrix is " << endl << essential_matrix << endl;
 
-
-
     RCLCPP_INFO(get_logger(), "PoseEstimation3");   
-
 
     //−− Recover rotation and translation from the essential matrix.
     recoverPose(essential_matrix, points1, points2, R, t, focal_length, principal_point);
@@ -304,6 +326,7 @@ void Tracking::PoseEstimation(vector<KeyPoint> keypoints_1, vector<KeyPoint> key
     RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2));
     RCLCPP_ERROR(get_logger(), "Estimated R: %f %f %f", R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2));
     RCLCPP_ERROR(get_logger(), "Estimated t: %f %f %f", t.at<double>(0), t.at<double>(1), t.at<double>(2));
+
 
 
 

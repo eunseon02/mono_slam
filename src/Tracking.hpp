@@ -4,8 +4,8 @@
 #include "frame.hpp"
 #include "Visualization.hpp"
 
-#include<opencv2/core/core.hpp>
-#include<opencv2/features2d/features2d.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <cv_bridge/cv_bridge.h>
 
@@ -39,6 +39,7 @@ public:
 
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr RawImagePublisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr PeocessedImagePublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr test_keypoint_Publisher;
 
 
     static unsigned long nextId; // for Keyframe ID 

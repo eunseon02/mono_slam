@@ -16,7 +16,7 @@ Visualization::Visualization() : Node("Visualization") {
     pub_marker_array = this->create_publisher<visualization_msgs::msg::MarkerArray>("mono/pose", 10);
 }
 
-void Visualization::VisualizeCamera(std::shared_ptr<Frame> frame)
+void Visualization::VisualizeCamera(Frame* frame)
 {
     RCLCPP_INFO(this->get_logger(), "### start visualization ###");
 

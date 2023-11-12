@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
    return LaunchDescription([
         ExecuteProcess(
-            cmd=["ros2", "run", "rviz2", "rviz2"], output="screen"
+            cmd=["ros2", "run", "rviz2", "rviz2", "-d", "/home/eunseon/ros2_ws/src/mono_slam/rviz/mono.rviz"], output="screen"
         ),
 
         Node(

@@ -20,7 +20,7 @@ class Frame; //
 class Visualization : public rclcpp::Node {
 public:
     Visualization();
-    void VisualizeCamera(std::shared_ptr<Frame> frame);
+    void VisualizeCamera(Frame*frame);
     Mat DrawFrame();
 
 private:
