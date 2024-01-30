@@ -25,6 +25,8 @@ find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 #find_package(Threads REQUIRED)
 
 
@@ -32,13 +34,17 @@ add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src
 
 #add_executable(mono_slam src/main.cpp src/Tracking.cpp src/ORB_extractor.cpp src/frame.cpp)
 
-ament_target_dependencies(mono_slam rclcpp cv_bridge image_transport sensor_msgs visualization_msgs OpenCV)
-
-
-#add_executable(mono_test src/mono.cpp)
-#ament_target_dependencies(mono_test rclcpp cv_bridge image_transport sensor_msgs visualization_msgs OpenCV)
-
-
+ament_target_dependencies(mono_slam 
+  rclcpp 
+  cv_bridge 
+  image_transport 
+  sensor_msgs 
+  visualization_msgs 
+  OpenCV 
+  tf2 
+  tf2_ros 
+  geometry_msgs
+)
 
 install(TARGETS
   mono_slam
@@ -51,24 +57,5 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
-# install(
-#   DIRECTORY include/
-#   DESTINATION include
-# )
-
-#target_link_libraries(mono_slam Threads::Threads)
-
-ament_target_dependencies(mono_slam rclcpp cv_bridge)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 ament_package()

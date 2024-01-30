@@ -45,7 +45,7 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
     Ptr<DescriptorExtractor> descriptor = ORB::create();
     Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce-Hamming");
 
-    RCLCPP_INFO(get_logger(), "extractAndMatchORB");
+    // RCLCPP_INFO(get_logger(), "extractAndMatchORB");
 
     //−− detect Oriented FAST
     // chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
@@ -59,7 +59,8 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
     sensor_msgs::msg::Image::SharedPtr img1_msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", img_1).toImageMsg();
     Raw_ImagePublisher->publish(*img1_msg);
 
-    RCLCPP_INFO(get_logger(), "drawMatches");   
+    // RCLCPP_INFO(get_logger(), "drawMatches");   
+
     // if (keypoints_1.empty()){
     //     detector->detect(img_1, keypoints_1);    
     //     descriptor->compute(img_1, keypoints_1, descriptors_1);
@@ -73,7 +74,7 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
     detector->detect(img_2, keypoints_2);
     descriptor->compute(img_2, keypoints_2, descriptors_2);
     
-    RCLCPP_INFO(get_logger(), "drawMatches2");   
+    // RCLCPP_INFO(get_logger(), "drawMatches2");   
 
     // chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
     // chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
@@ -83,7 +84,7 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
     drawKeypoints(img_1, keypoints_1, outimg1, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
     // imshow("ORB features", outimg1);
 
-    RCLCPP_INFO(get_logger(), "drawMatches3"); 
+    // RCLCPP_INFO(get_logger(), "drawMatches3"); 
 
     //−− use Hamming distance to match the features
     // t1 = chrono::steady_clock::now();
@@ -92,7 +93,7 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
     // time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
     // cout << "match ORB cost = " << time_used.count() << " seconds. " << endl;
 
-    RCLCPP_INFO(get_logger(), "drawMatches3"); 
+    // RCLCPP_INFO(get_logger(), "drawMatches3"); 
 
     //−− sort and remove the outliers
     // min and max distance
@@ -117,7 +118,7 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
     drawMatches(img_1, keypoints_1, img_2, keypoints_2, good_matches, img_goodmatch);
     // RCLCPP_INFO(get_logger(), "drawMatches");
 
-    RCLCPP_INFO(get_logger(), "drawMatches!!"); 
+    // RCLCPP_INFO(get_logger(), "drawMatches!!"); 
 
     // Inside the extractAndMatchORB function
     cv_bridge::CvImage img_bridge = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", img_goodmatch);
@@ -137,7 +138,8 @@ void ORB_extractor::extractAndMatchORB(const cv::Mat &img_1, const cv::Mat &img_
 }
 
 void ORB_extractor::extractORB(const cv::Mat &img, vector<KeyPoint> &keypoints) {
-    Mat descriptors_;
+    Mat descriptors_;    
+    Mat outimg;
     Ptr<FeatureDetector> detector = ORB::create();
     Ptr<DescriptorExtractor> descriptor = ORB::create();
 
@@ -145,9 +147,45 @@ void ORB_extractor::extractORB(const cv::Mat &img, vector<KeyPoint> &keypoints) 
     descriptor->compute(img, keypoints, descriptors_);
 
 
-    RCLCPP_INFO(get_logger(), "extractORB");   
 
-
-    // Mat outimg;
-    // drawKeypoints(img, keypoints, outimg, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+    drawKeypoints(img, keypoints, outimg, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+    // cv::imshow("keypoint", outimg);
+    // cv::waitKey(1);
 }
+
+
+//  void ORB_extractor::featureDetection(Mat img, vector<Point2f> & points){
+//     vector<KeyPoint> keypoints;
+//     int fast_threshold = 20;
+//     bool nonmaxSupression = true;
+
+//     cv::FAST(img, keypoints, fast_threshold, nonmaxSupression);
+//     KeyPoint::convert(keypoints, points, vector<int>());
+// }
+
+
+//  void ORB_extractor::featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Point2f>& points2, vector<uchar>& status){
+//     //this function automatically gets rid of points for which tracking fails
+
+//     vector<float> err;
+//     Size winSize(21,21);
+//     TermCriteria termcrit(TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01);
+
+//     calcOpticalFlowPyrLK(img_1, img_2, points1, points2, status, err, winSize, 3, termcrit, 0, 0.001);
+
+//     //getting rid of points for which the KLT tracking failed or those who have gone outside the frame
+//     int indexCorrection = 0;
+//     for( int i=0; i<status.size(); i++)
+//     {
+//         Point2f pt = points2.at(i- indexCorrection);
+//         if ((status.at(i) == 0) || (pt.x<0) || (pt.y<0))	{
+//         if((pt.x<0) || (pt.y<0))	{
+//             status.at(i) = 0;
+//         }
+
+//         points1.erase (points1.begin() + i - indexCorrection);
+//         points2.erase (points2.begin() + i - indexCorrection);
+//         indexCorrection++;
+//         }
+//     }
+// }

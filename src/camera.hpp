@@ -16,7 +16,7 @@ class Camera {
 public:
     typedef std::shared_ptr<Camera> Ptr;
 
-    double fx_ = 1472.62688498893, fy_ = 1474.655608146319, cx_ = 1195.035113615952, cy_ = 1014.64576017491, baseline_ = 0;  // Camera intrinsics
+    double fx_ = 7.188560000000e+02, fy_ = 7.188560000000e+02 , cx_ = 6.071928000000e+02, cy_ = 1.852157000000e+02, baseline_ = 0;  // Camera intrinsics
     SE3 pose_;             // extrinsic, from stereo camera to single camera
     SE3 pose_inv_;         // inverse of extrinsics
 

@@ -41,7 +41,7 @@ void Visualization::VisualizeCamera(Frame* frame)
     currentCam.scale.y = 1.0;
     currentCam.scale.z = 0.1;
     currentCam.color.g = 1.0;
-    currentCam.color.a = 1.0;  // 불투명도
+    currentCam.color.a = 1.0;  
 
     // position of current camera
     marker_array.markers.push_back(currentCam);

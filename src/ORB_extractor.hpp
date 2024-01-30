@@ -23,6 +23,9 @@ public:
     void extractAndMatchORB(const Mat &img_1, const Mat &img_2, vector<KeyPoint> &keypoints_1, vector<KeyPoint> &keypoints_2, vector<DMatch> &matches);
     void extractORB(const cv::Mat &img, vector<KeyPoint> &keypoints);
 
+    // void featureDetection(Mat img, vector<Point2f> & points);
+    // void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Point2f>& points2, vector<uchar>& status);
+
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr MatchingResultPublisher;  
 // private:
 

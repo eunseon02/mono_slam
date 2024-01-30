@@ -26,7 +26,12 @@ public:
     std::mutex pose_mutex_;
     cv::Mat img_;
     vector<KeyPoint> keypoints;
+    vector<Point2f> points;
+    vector<uchar> status;
+    vector<DMatch> matches;
     vector<DMatch> fIniMatches;
+    vector<Point3d> mCurrentMappoints;
+    vector<Point3d> WorldMappoint;
     // std::set<*Mappoint> mMapPoints;
 
     std::shared_ptr<ORB_extractor> mpORBextractor;  
@@ -34,8 +39,10 @@ public:
     // Camera Pose
     cv::Mat mTcw;
     void UpdatePoseMatrices();
+    void UpdatetoWorld();
 //--
     Frame(Mat &im, const double &timeStamp, std::shared_ptr<ORB_extractor> extractor);
+    Frame(Mat &im, unsigned long mdId);
 
     cv::Mat mDistCoef;
 
@@ -65,11 +72,16 @@ public:
         mtcw = t;
     }
 
+    Mat GetmRcw(){
+        return mRcw;
+    }
+
 private:
     // Call UpdatePoseMatrices(), before using
     cv::Mat mOw;
     cv::Mat mRcw;
     cv::Mat mtcw;
+    
 
 };
 // class Mappoint
